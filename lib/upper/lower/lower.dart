@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class FirstTab extends StatelessWidget {
-  const FirstTab({super.key, required this.inner});
+class LowerTab extends StatelessWidget {
+  const LowerTab({super.key, required this.inner});
 
   final StatefulNavigationShell inner;
 
@@ -14,7 +14,7 @@ class FirstTab extends StatelessWidget {
         children: [
           const Padding(
             padding: EdgeInsets.all(8),
-            child: Text('first'),
+            child: Text('lower'),
           ),
           SizedBox(
             width: 300,

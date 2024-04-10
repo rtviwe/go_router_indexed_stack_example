@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class ATab extends StatelessWidget {
-  const ATab({super.key, required this.inner});
+class UpperTab extends StatelessWidget {
+  const UpperTab({
+    super.key,
+    required this.inner,
+    required this.parentPath,
+    required this.tabContent,
+  });
 
   final StatefulNavigationShell inner;
+  final String parentPath;
+  final List<String> tabContent;
 
   @override
   Widget build(BuildContext context) {
@@ -12,9 +19,9 @@ class ATab extends StatelessWidget {
       backgroundColor: Colors.black12,
       body: Row(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(8),
-            child: Text('A'),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text('Upper $parentPath'),
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
@@ -26,20 +33,14 @@ class ATab extends StatelessWidget {
                   child: const Text('Close'),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(4),
-                child: ElevatedButton(
-                  onPressed: () => inner.goBranch(1),
-                  child: const Text('First'),
+              for (final content in tabContent.indexed)
+                Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: ElevatedButton(
+                    onPressed: () => inner.goBranch(content.$1 + 1),
+                    child: Text(content.$2),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(4),
-                child: ElevatedButton(
-                  onPressed: () => inner.goBranch(2),
-                  child: const Text('Second'),
-                ),
-              ),
             ],
           ),
           SizedBox(

@@ -4,16 +4,44 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:indexed_stack/upper/a.dart';
-import 'package:indexed_stack/upper/b.dart';
+import 'package:indexed_stack/upper/upper.dart';
 import 'package:indexed_stack/upper/lower/content/content.dart';
-import 'package:indexed_stack/upper/lower/first.dart';
-import 'package:indexed_stack/upper/lower/second.dart';
+import 'package:indexed_stack/upper/lower/lower.dart';
 import 'package:indexed_stack/main.dart';
+
+final firstTabContentProvider = StreamProvider((ref) {
+  final inputData = Stream.fromIterable([
+    ['1', '2'],
+    ['1', '2', '3'],
+    ['1', '2'],
+  ]);
+
+  return streamDelayer(inputData, const Duration(seconds: 2));
+});
+
+final secondTabContentProvider = StreamProvider((ref) {
+  final inputData = Stream.fromIterable([
+    ['4', '5'],
+    ['4', '5', '6'],
+    ['4', '5'],
+  ]);
+
+  return streamDelayer(inputData, const Duration(seconds: 2));
+});
+
+Stream<T> streamDelayer<T>(Stream<T> inputStream, Duration delay) async* {
+  await for (final val in inputStream) {
+    yield val;
+    await Future.delayed(delay);
+  }
+}
 
 final appGoRouterProvider = Provider<GoRouter>(
   (ref) {
     final appNavigatorKey = ref.read(appNavigatorKeyProvider);
+
+    final firstTabContentData = ref.watch(firstTabContentProvider).asData!;
+    final secondTabContentData = ref.watch(secondTabContentProvider).asData!;
 
     final router = GoRouter(
       navigatorKey: appNavigatorKey,
@@ -35,8 +63,8 @@ final appGoRouterProvider = Provider<GoRouter>(
               },
               branches: [
                 getEmptyTab(''),
-                getATab(),
-                getBTab(),
+                getUpperTab('/a', firstTabContentData.value),
+                getUpperTab('/b', secondTabContentData.value),
               ],
             ),
           ],
@@ -55,73 +83,42 @@ final appGoRouterProvider = Provider<GoRouter>(
   },
 );
 
-// /a
-StatefulShellBranch getATab() => StatefulShellBranch(
+// Upper
+StatefulShellBranch getUpperTab(String parentPath, List<String> tabContent) =>
+    StatefulShellBranch(
       routes: [
         StatefulShellRoute.indexedStack(
           pageBuilder: (context, state, child) {
             return NoTransitionPage(
               key: state.pageKey,
-              child: ATab(inner: child),
+              child: UpperTab(
+                inner: child,
+                parentPath: parentPath,
+                tabContent: tabContent,
+              ),
             );
           },
           branches: [
-            getEmptyTab('/a'),
-            getFirstTab('/a'),
-            getSecondTab('/a'),
+            getEmptyTab('$parentPath/upper'),
+            for (final content in tabContent)
+              getLowerTab('$parentPath/upper/$content'),
           ],
         ),
       ],
     );
 
-// /b
-StatefulShellBranch getBTab() => StatefulShellBranch(
+// Lower
+StatefulShellBranch getLowerTab(String parentPath) => StatefulShellBranch(
       routes: [
         StatefulShellRoute.indexedStack(
           pageBuilder: (context, state, child) {
             return NoTransitionPage(
               key: state.pageKey,
-              child: BTab(inner: child),
+              child: LowerTab(inner: child),
             );
           },
           branches: [
-            getEmptyTab('/b'),
-            getFirstTab('/b'),
-            getSecondTab('/b'),
-          ],
-        ),
-      ],
-    );
-
-// /first
-StatefulShellBranch getFirstTab(String parentPath) => StatefulShellBranch(
-      routes: [
-        StatefulShellRoute.indexedStack(
-          pageBuilder: (context, state, child) {
-            return NoTransitionPage(
-              key: state.pageKey,
-              child: FirstTab(inner: child),
-            );
-          },
-          branches: [
-            getContentTab('$parentPath/first'),
-          ],
-        ),
-      ],
-    );
-
-// /second
-StatefulShellBranch getSecondTab(String parentPath) => StatefulShellBranch(
-      routes: [
-        StatefulShellRoute.indexedStack(
-          pageBuilder: (context, state, child) {
-            return NoTransitionPage(
-              key: state.pageKey,
-              child: SecondTab(inner: child),
-            );
-          },
-          branches: [
-            getContentTab('$parentPath/second'),
+            getContentTab('$parentPath/lower'),
           ],
         ),
       ],
