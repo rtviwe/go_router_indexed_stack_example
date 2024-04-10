@@ -104,8 +104,7 @@ StatefulShellBranch getFirstTab(String parentPath) => StatefulShellBranch(
             );
           },
           branches: [
-            getEmptyTab('$parentPath/first'),
-            getContentTab(parentPath),
+            getContentTab('$parentPath/first'),
           ],
         ),
       ],
@@ -122,8 +121,7 @@ StatefulShellBranch getSecondTab(String parentPath) => StatefulShellBranch(
             );
           },
           branches: [
-            getEmptyTab('$parentPath/second'),
-            getContentTab(parentPath),
+            getContentTab('$parentPath/second'),
           ],
         ),
       ],
