@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:indexed_stack/router.dart';
 
-class UpperTab extends StatelessWidget {
+class UpperTab extends HookConsumerWidget {
   const UpperTab({
     super.key,
     required this.inner,
@@ -14,7 +17,18 @@ class UpperTab extends StatelessWidget {
   final List<String> tabContent;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    useEffect(
+      () {
+        Future.delayed(const Duration(seconds: 3), () {
+          final config = myConfig;
+          config.updateBranches(['1', '2'], ['1', '2']);
+        });
+        return () {};
+      },
+      const [],
+    );
+
     return Scaffold(
       backgroundColor: Colors.black12,
       body: Row(

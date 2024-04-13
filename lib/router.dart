@@ -9,67 +9,57 @@ import 'package:indexed_stack/upper/lower/content/content.dart';
 import 'package:indexed_stack/upper/lower/lower.dart';
 import 'package:indexed_stack/main.dart';
 
-final firstTabContentProvider = StreamProvider((ref) {
-  final inputData = Stream.fromIterable([
-    ['1', '2'],
-    ['1', '2', '3'],
-    ['1', '2'],
-  ]);
+final myConfig = GoRouterConfigNotifier(
+  generateRoutingConfig(['1'], ['1']),
+);
 
-  return streamDelayer(inputData, const Duration(seconds: 2));
-});
+class GoRouterConfigNotifier extends ValueNotifier<RoutingConfig> {
+  GoRouterConfigNotifier(super.value);
 
-final secondTabContentProvider = StreamProvider((ref) {
-  final inputData = Stream.fromIterable([
-    ['4', '5'],
-    ['4', '5', '6'],
-    ['4', '5'],
-  ]);
-
-  return streamDelayer(inputData, const Duration(seconds: 2));
-});
-
-Stream<T> streamDelayer<T>(Stream<T> inputStream, Duration delay) async* {
-  await for (final val in inputStream) {
-    yield val;
-    await Future.delayed(delay);
+  void updateBranches(
+    List<String> firstTabContentData,
+    List<String> secondTabContentData,
+  ) {
+    value = generateRoutingConfig(firstTabContentData, secondTabContentData);
   }
+}
+
+RoutingConfig generateRoutingConfig(
+  List<String> firstTabContentData,
+  List<String> secondTabContentData,
+) {
+  return RoutingConfig(
+    routes: [
+      ShellRoute(
+        pageBuilder: (context, state, child) => NoTransitionPage(
+          key: state.pageKey,
+          child: child,
+        ),
+        routes: [
+          StatefulShellRoute.indexedStack(
+            pageBuilder: (context, state, child) {
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: MainPage(inner: child),
+              );
+            },
+            branches: [
+              getEmptyTab(''),
+              getUpperTab('/a', firstTabContentData),
+              getUpperTab('/b', secondTabContentData),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
 }
 
 final appGoRouterProvider = Provider<GoRouter>(
   (ref) {
-    final appNavigatorKey = ref.read(appNavigatorKeyProvider);
-
-    final firstTabContentData = ref.watch(firstTabContentProvider).asData!;
-    final secondTabContentData = ref.watch(secondTabContentProvider).asData!;
-
-    final router = GoRouter(
-      navigatorKey: appNavigatorKey,
+    final router = GoRouter.routingConfig(
+      routingConfig: myConfig,
       initialLocation: '/empty',
-      routes: [
-        // /
-        ShellRoute(
-          pageBuilder: (context, state, child) => NoTransitionPage(
-            key: state.pageKey,
-            child: child,
-          ),
-          routes: [
-            StatefulShellRoute.indexedStack(
-              pageBuilder: (context, state, child) {
-                return NoTransitionPage(
-                  key: state.pageKey,
-                  child: MainPage(inner: child),
-                );
-              },
-              branches: [
-                getEmptyTab(''),
-                getUpperTab('/a', firstTabContentData.value),
-                getUpperTab('/b', secondTabContentData.value),
-              ],
-            ),
-          ],
-        ),
-      ],
     );
 
     // ignore: invalid_use_of_visible_for_testing_member

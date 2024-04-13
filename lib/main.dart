@@ -15,8 +15,6 @@ void main() {
   );
 }
 
-final appNavigatorKeyProvider = Provider((ref) => GlobalKey<NavigatorState>());
-
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
